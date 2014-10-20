@@ -10,7 +10,6 @@ import java.util.Iterator;
 import java.util.Map;
 
 import realtimeweb.earthquakewatcher.domain.*;
-
 import realtimeweb.stickyweb.EditableCache;
 import realtimeweb.stickyweb.StickyWeb;
 import realtimeweb.stickyweb.StickyWebRequest;
@@ -33,17 +32,51 @@ public class EarthquakeWatcher {
     
     public static void main(String[] args) {
         EarthquakeWatcher earthquakeWatcher = new EarthquakeWatcher();
-        Report rp = earthquakeWatcher.getEarthquakes("1.0", "day");	//http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/1.0_hour.geojson
-        System.out.println(rp.getTitle()+","+rp.getArea());
+        /*
+         * http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/1.0_hour.geojson
+         */
+        Report rp = earthquakeWatcher.getEarthquakes("1.0", "hour");
+        System.out.println("Report Title:"+rp.getTitle()+"\nBBox:"+rp.getArea());
+
         for(Earthquake eq:rp.getEarthquakes()){
-        	System.out.println(eq);
+        	System.out.println("Place:"+eq.getLocationDescription());
+        	System.out.println("Magnitude:"+eq.getMagnitude());
+        	System.out.println("Time:"+eq.getTime());
+        	System.out.println("Coordinates:"+eq.getLocation());
+        	System.out.println();
         }
         
+        
+        //Test load data from cache
+        earthquakeWatcher = new EarthquakeWatcher("cache.json");
+        rp = earthquakeWatcher.getEarthquakes("1.0", "hour");
+        System.out.println("-----------------From Cache----------------");
+        System.out.println("Report Title:"+rp.getTitle()+"\nBBox:"+rp.getArea());
+
+        for(Earthquake eq:rp.getEarthquakes()){
+        	System.out.println("Place:"+eq.getLocationDescription());
+        	System.out.println("Magnitude:"+eq.getMagnitude());
+        	System.out.println("Time:"+eq.getTime());
+        	System.out.println("Coordinates:"+eq.getLocation());
+        	System.out.println();
+        }
+        
+        
+//        /*
         // The following pre-generated code demonstrates how you can
 		// use StickyWeb's EditableCache to create data files.
 		try {
             // First, you create a new EditableCache, possibly passing in an FileInputStream to an existing cache
 			EditableCache recording = new EditableCache();
+			
+			String[][] requests = {{"1.0","hour"},{"1.0","day"}};
+			for (String[] request : requests) {
+				System.out.println("threshold:"+request[0]+" time_range:"+request[1]);
+				recording.addData(earthquakeWatcher.getEarthquakesRequest(request[0], request[1]));			
+			}
+            // Then you can save the expanded cache, possibly over the original
+			recording.saveToStream(new FileOutputStream("cache.json"));
+			
             // You can add a Request object directly to the cache.
 			// recording.addData(earthquakeWatcher.getEarthquakesRequest(...));
             // Then you can save the expanded cache, possibly over the original
@@ -58,6 +91,21 @@ public class EarthquakeWatcher {
 			System.err.println("The given cache.json file was not found, or could not be opened.");
 		}
         // ** End of how to use the EditableCache
+        // ** End of how to use the EditableCache
+		catch (StickyWebNotInCacheException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (StickyWebInternetException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (StickyWebInvalidQueryString e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (StickyWebInvalidPostArguments e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+//		*/
     }
 	
     /**

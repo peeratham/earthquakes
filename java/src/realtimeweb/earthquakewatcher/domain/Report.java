@@ -86,13 +86,17 @@ public class Report {
         // TODO: Check that the data has the correct schema.
         // NOTE: It's much safer to check the Map for fields than to catch a runtime exception.
         try {
-        	  this.area = new BoundingBox((List<Object>)raw.get("bbox"));
+        	  //there's no bounding box if there's only one earthquake in the report
+        	  if((List<Object>)raw.get("bbox")!=null){
+        		  this.area = new BoundingBox((List<Object>)raw.get("bbox"));
+        	  }
+        		  
         	  this.earthquakes = new ArrayList<Earthquake>();
         	  Iterator<Object> earthquakesIter = ((List<Object>)raw.get("features")).iterator();
         	  while (earthquakesIter.hasNext()) {
         		  this.earthquakes.add(new Earthquake((Map<String, Object>)earthquakesIter.next()));
         	  }
-            this.title = ((Map<String, Object>) raw.get("metadata")).get("title").toString();
+        	  this.title = ((Map<String, Object>) raw.get("metadata")).get("title").toString();
         } catch (NullPointerException e) {
     		System.err.println("Could not convert the response to a Report; a field was missing.");
     		e.printStackTrace();
